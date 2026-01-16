@@ -1,0 +1,5 @@
+{
+  "name": "A股超额收益分析",
+  "description": "对比上证指数与行业板块走势，计算相对强弱差值 (Alpha) 的金融分析工具。",
+  "requestFramePermissions": []
+}
