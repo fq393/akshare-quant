@@ -4,3 +4,5 @@ akshare
 pandas
 requests
 scipy
+pyjwt
+python-multipart

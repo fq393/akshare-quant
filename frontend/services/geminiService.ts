@@ -1,6 +1,11 @@
 import { DailyData, AnalysisResult } from "../types";
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = '/api';
+
+const getAuthHeaders = () => {
+  const token = sessionStorage.getItem('akshare_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
 
 export const analyzeTrendWithGemini = async (
   data: DailyData[],
@@ -29,6 +34,7 @@ export const analyzeTrendWithGemini = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders()
       },
       body: JSON.stringify(payload)
     });

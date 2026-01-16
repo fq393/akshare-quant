@@ -2,22 +2,33 @@ import React, { useState } from 'react';
 import { Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
 interface LoginModalProps {
-  onLogin: (password: string) => boolean;
+  onLogin: (password: string) => Promise<boolean> | boolean;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onLogin(password)) {
-      setError(false);
-    } else {
+    setLoading(true);
+    try {
+      const success = await onLogin(password);
+      if (success) {
+        setError(false);
+      } else {
+        setError(true);
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+      }
+    } catch (e) {
       setError(true);
       setShake(true);
       setTimeout(() => setShake(false), 500);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,7 +40,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
             <Lock className="w-8 h-8 text-blue-400" />
           </div>
           <h2 className="text-2xl font-bold text-white tracking-tight">
-            AKShare 量化分析台
+            系统后台
           </h2>
           <p className="text-slate-400 mt-2 text-sm">
             请输入访问密码以继续
@@ -60,10 +71,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-blue-900/20"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-blue-900/20"
           >
-            <span>进入系统</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <span>{loading ? '登录中...' : '进入系统'}</span>
+            {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
         

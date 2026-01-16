@@ -6,7 +6,7 @@ import {
 import { 
   TrendingUp, Activity, BarChart3, RefreshCw, 
   BrainCircuit, ChevronDown, Clock, Layers, CandlestickChart, Scale,
-  Settings, X, Save, Key, HelpCircle
+  Settings, X, Save, Key, HelpCircle, LogOut
 } from 'lucide-react';
 import { fetchSectors, fetchMarketData, AVAILABLE_MARKETS } from './services/dataService';
 import { analyzeTrendWithGemini } from './services/geminiService';
@@ -45,18 +45,41 @@ const App: React.FC = () => {
     return sessionStorage.getItem('akshare_auth') === 'true';
   });
 
-  const handleLogin = (pwd: string) => {
-    // Hardcoded password for access control
-    if (pwd === 'yydxccjnnyswxdy') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('akshare_auth', 'true');
-      return true;
+  const handleLogin = async (pwd: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('username', 'admin');
+      formData.append('password', pwd);
+
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        sessionStorage.setItem('akshare_token', data.access_token);
+        sessionStorage.setItem('akshare_auth', 'true');
+        setIsAuthenticated(true);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error("Login error", e);
+      return false;
     }
-    return false;
   };
 
-  // 1. Fetch Sectors on Mount
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('akshare_auth');
+    sessionStorage.removeItem('akshare_token');
+  };
+
+  // 1. Fetch Sectors on Mount (only if authenticated)
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadSectors = async () => {
       try {
         const list = await fetchSectors();
@@ -72,7 +95,7 @@ const App: React.FC = () => {
       }
     };
     loadSectors();
-  }, []);
+  }, [isAuthenticated]);
 
   // 2. Fetch Market Data when selection changes
   useEffect(() => {
@@ -342,6 +365,16 @@ const App: React.FC = () => {
               </button>
             ))}
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-1.5 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded-lg transition-colors text-sm ml-auto xl:ml-0"
+            title="退出登录"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">退出</span>
+          </button>
 
           {/* Settings Button */}
           <button 

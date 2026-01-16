@@ -1,6 +1,11 @@
 import { DailyData, SectorOption, MarketOption, TimeRange } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = '/api';
+
+const getAuthHeaders = () => {
+  const token = sessionStorage.getItem('akshare_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
 
 export const getDaysFromRange = (range: TimeRange): number => {
   switch (range) {
@@ -16,7 +21,11 @@ export const getDaysFromRange = (range: TimeRange): number => {
 
 export const fetchSectors = async (): Promise<SectorOption[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/sectors`);
+    const response = await fetch(`${API_BASE_URL}/sectors`, {
+      headers: {
+        ...getAuthHeaders()
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch sectors');
     }
@@ -43,7 +52,11 @@ export const fetchMarketData = async (
   const url = `${API_BASE_URL}/market_data?sector_name=${encodeURIComponent(sector.name)}&market_symbol=${market.code}&days=${days}`;
   
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        ...getAuthHeaders()
+      }
+    });
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to fetch market data: ${errorText}`);

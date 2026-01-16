@@ -28,3 +28,7 @@ class AnalysisRequest(BaseModel):
     lag_days: int
     similarity_score: Optional[float] = None
     recent_data: List[DailyData]  # Send last 30 days or so to avoid huge payload
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

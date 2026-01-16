@@ -36,5 +36,10 @@ COPY --from=frontend-builder /app/frontend/dist ./static
 # Expose the application port
 EXPOSE 8000
 
+# Set environment variables
+ENV OMP_NUM_THREADS=1
+ENV MKL_NUM_THREADS=1
+ENV OPENBLAS_NUM_THREADS=1
+
 # Start the application
 CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000"]
